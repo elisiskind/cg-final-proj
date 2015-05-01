@@ -6,7 +6,10 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.*;
+
 import java.awt.event.*;
+import java.io.*;
+import java.nio.*;
 
 class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener {
 
@@ -216,6 +219,73 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         gl.glCullFace(GL.GL_BACK);
         gl.glEnable(GL.GL_CULL_FACE);
         gl.glShadeModel(GL.GL_SMOOTH);
+        
+		int v = gl.glCreateShader(GL.GL_VERTEX_SHADER);
+		int f = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+		
+		String[] fsrc = loadShader("checker.frag");
+		String[] vsrc = loadShader("checker.vert");
+		
+		gl.glShaderSource(v, 1, vsrc, null, 0);
+		gl.glCompileShader(v);
+		
+		gl.glShaderSource(f, 1, fsrc, null, 0);
+		gl.glCompileShader(f);
+
+		int shaderprogram = gl.glCreateProgram();
+		gl.glAttachShader(shaderprogram, v);
+		gl.glAttachShader(shaderprogram, f);
+		gl.glLinkProgram(shaderprogram);
+		gl.glValidateProgram(shaderprogram);
+        IntBuffer intBuffer = IntBuffer.allocate(1);
+        gl.glGetProgramiv(shaderprogram, GL.GL_LINK_STATUS, intBuffer);
+        
+        if (intBuffer.get(0) != 1)
+        {
+            gl.glGetProgramiv(shaderprogram, GL.GL_INFO_LOG_LENGTH, intBuffer);
+            int size = intBuffer.get(0);
+            System.err.println("Program link error: ");
+            if (size > 0)
+            {
+                ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+                gl.glGetProgramInfoLog(shaderprogram, size, intBuffer, byteBuffer);
+                for (byte b : byteBuffer.array())
+                {
+                    System.err.print((char) b);
+                }
+            }
+            else
+            {
+                System.out.println("Unknown");
+            }
+            System.exit(1);
+        }
+
+		gl.glUseProgram(shaderprogram);
+	}
+    
+	
+	public String[] loadShader( String name )
+    {
+        StringBuilder sb = new StringBuilder();
+        try
+        {
+            InputStream is = getClass().getResourceAsStream(name);
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            String line;
+            while ((line = br.readLine()) != null)
+            {
+                sb.append(line);
+                sb.append('\n');
+            }
+            is.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return new String[]
+        { sb.toString() };
     }
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
