@@ -17,6 +17,8 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     private final GLCanvas canvas;
     private final GLU glu = new GLU();
     BranchedTube first;
+    private ObjModel white = new ObjModel("models/white_blood_cell.obj");
+    private ObjModel red = new ObjModel("models/red_blood_cell.obj");
     private GL gl;
     private FPSAnimator animator;
     private int winW = 800, winH = 800;
@@ -99,6 +101,47 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     }
 
     public void display(GLAutoDrawable drawable) {
+    	
+    //begin shader
+    	int v = gl.glCreateShader(GL.GL_VERTEX_SHADER);
+    	int v2 = gl.glCreateShader(GL.GL_VERTEX_SHADER);
+		int f = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+		int f2 = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+		
+		String[] fsrc = loadShader("checker.frag");
+		String[] vsrc = loadShader("checker.vert");
+		String[] vsrc2 = loadShader("sss.vert");
+		String[] fsrc2 = loadShader("sss.frag");
+		
+		gl.glShaderSource(v, 1, vsrc, null, 0);
+		gl.glCompileShader(v);
+		gl.glShaderSource(f, 1, fsrc, null, 0);
+		gl.glCompileShader(f);
+		gl.glShaderSource(f2, 1, fsrc2, null, 0);
+		gl.glCompileShader(f2);
+		gl.glShaderSource(v2, 1, vsrc2, null, 0);
+		gl.glCompileShader(v2);
+		
+		int shaderprogram = gl.glCreateProgram();
+		gl.glAttachShader(shaderprogram, v);
+		gl.glAttachShader(shaderprogram, f);
+		gl.glLinkProgram(shaderprogram);
+		gl.glValidateProgram(shaderprogram);
+		
+		int shaderprogram2 = gl.glCreateProgram();
+		gl.glAttachShader(shaderprogram2, v2);
+		gl.glAttachShader(shaderprogram2, f);
+		gl.glLinkProgram(shaderprogram2);
+		gl.glValidateProgram(shaderprogram2);
+		
+		int shaderprogram3 = gl.glCreateProgram();
+		gl.glAttachShader(shaderprogram3, v);
+		gl.glAttachShader(shaderprogram3, f2);
+		gl.glLinkProgram(shaderprogram3);
+		gl.glValidateProgram(shaderprogram3);
+
+	//end shader
+		
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
         gl.glPolygonMode(GL.GL_FRONT_AND_BACK, wireframe ? GL.GL_LINE : GL.GL_FILL);
@@ -114,6 +157,15 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
 
         moveCamera();
 
+		gl.glUseProgram(shaderprogram);
+		gl.glScalef(.1f, .1f, .1f);
+        white.draw(gl);
+        gl.glTranslatef(0, 2.5f, 0);
+		gl.glUseProgram(shaderprogram2);
+        red.draw(gl);
+        gl.glScalef(10f, 10f, 10f);
+
+		gl.glUseProgram(shaderprogram3);
         gl.glPushMatrix();    // push the current matrix to stack
         if (first == null) {
             first = new BranchedTube(gl);
@@ -220,48 +272,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         gl.glEnable(GL.GL_CULL_FACE);
         gl.glShadeModel(GL.GL_SMOOTH);
         
-		int v = gl.glCreateShader(GL.GL_VERTEX_SHADER);
-		int f = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
 		
-		String[] fsrc = loadShader("checker.frag");
-		String[] vsrc = loadShader("checker.vert");
-		
-		gl.glShaderSource(v, 1, vsrc, null, 0);
-		gl.glCompileShader(v);
-		
-		gl.glShaderSource(f, 1, fsrc, null, 0);
-		gl.glCompileShader(f);
-
-		int shaderprogram = gl.glCreateProgram();
-		gl.glAttachShader(shaderprogram, v);
-		gl.glAttachShader(shaderprogram, f);
-		gl.glLinkProgram(shaderprogram);
-		gl.glValidateProgram(shaderprogram);
-        IntBuffer intBuffer = IntBuffer.allocate(1);
-        gl.glGetProgramiv(shaderprogram, GL.GL_LINK_STATUS, intBuffer);
-        
-        if (intBuffer.get(0) != 1)
-        {
-            gl.glGetProgramiv(shaderprogram, GL.GL_INFO_LOG_LENGTH, intBuffer);
-            int size = intBuffer.get(0);
-            System.err.println("Program link error: ");
-            if (size > 0)
-            {
-                ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-                gl.glGetProgramInfoLog(shaderprogram, size, intBuffer, byteBuffer);
-                for (byte b : byteBuffer.array())
-                {
-                    System.err.print((char) b);
-                }
-            }
-            else
-            {
-                System.out.println("Unknown");
-            }
-            System.exit(1);
-        }
-
-		gl.glUseProgram(shaderprogram);
 	}
     
 	
