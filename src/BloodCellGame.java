@@ -6,10 +6,8 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.*;
-
+import javax.vecmath.Vector3f;
 import java.awt.event.*;
-import java.io.*;
-import java.nio.*;
 
 class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener {
 
@@ -119,6 +117,9 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
             first = new BranchedTube(gl);
         }
         first.draw(3);
+        Vector3f camera = first.getCamera(0);
+        glu.gluLookAt(0, -1, 0, 1, 0, 0, 0, 0, 1);
+
         gl.glPopMatrix();
     }
 
@@ -132,7 +133,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         gl.glTranslatef(-centerx, -centery, -centerz);
     }
 
-    private void set_material_mushroom() {
+    private void set_material() {
         //material
         float mat_ambient[] = {0.6f, 0.6f, 0.6f, 1};
         float mat_specular[] = {0f, 0f, 0f, 1};
@@ -153,13 +154,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         gl.glMaterialfv(GL.GL_BACK, GL.GL_SHININESS, bmat_shininess, 0);
     }
 
-    public void init(GLAutoDrawable drawable) {
-        gl = drawable.getGL();
-
-        initViewParameters();
-        gl.glClearColor(.1f, .1f, .1f, 1f);
-        gl.glClearDepth(1.0f);
-
+    public void init_lights() {
         // white light at the eye
         float light0_position[] = {0, 0, 1, 0};
         float light0_diffuse[] = {1, 1, 1, 1};
@@ -179,113 +174,54 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         float position[] = {.1f, .1f, 0, 0};
         float diffuse[] = {.05f, .05f, .6f, 1};
         float specular[] = {.05f, .05f, .6f, 1};
-        float spotDirection[] = {-1.0f, -1.0f, 0.f};
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_POSITION, position, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_DIFFUSE, diffuse, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_SPECULAR, specular, 0);
+    }
 
-        //material
-        float mat_ambient[] = {0, 0, 0, 1};
-        float mat_specular[] = {.8f, .8f, .8f, 1};
-        float mat_diffuse[] = {.4f, .4f, .4f, 1};
-        float mat_shininess[] = {128};
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT, mat_ambient, 0);
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_SPECULAR, mat_specular, 0);
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, mat_diffuse, 0);
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_SHININESS, mat_shininess, 0);
+    @Override
+    /**
+     * Initializes shading parameters and view parameters
+     * @param drawable
+     */
+    public void init(GLAutoDrawable drawable) {
+        gl = drawable.getGL();
 
-        float bmat_ambient[] = {0, 0, 0, 1};
-        float bmat_specular[] = {0, .8f, .8f, 1};
-        float bmat_diffuse[] = {0, .4f, .4f, 1};
-        float bmat_shininess[] = {128};
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_AMBIENT, bmat_ambient, 0);
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_SPECULAR, bmat_specular, 0);
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, bmat_diffuse, 0);
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_SHININESS, bmat_shininess, 0);
+        initViewParameters();
+        initShadingParameters();
+        init_lights();
 
-        float lmodel_ambient[] = {0, 0, 0, 1};
-        gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient, 0);
-        gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, 1);
+		Shader shader = new Shader(gl);
+        shader.load("shaders/checker.vert", Shader.Type.VERTEX);
+        shader.load("shaders/checker.frag", Shader.Type.FRAGMENT);
+		shader.link();
+	}
 
-        gl.glEnable(GL.GL_NORMALIZE);
-        gl.glEnable(GL.GL_LIGHTING);
-        gl.glEnable(GL.GL_LIGHT0);
-        gl.glEnable(GL.GL_LIGHT1);
-        gl.glEnable(GL.GL_LIGHT2);
+    /**
+     * Sets parameters so that objects are in view, and animation speeds are correct.
+     */
+    void initViewParameters() {
+        roth = rotv = 0;
 
+        znear = 0.01f;
+        zfar = 1000.f;
+
+        motionSpeed = 0.002f;
+        rotateSpeed = 0.1f;
+    }
+
+    /**
+     * Initializes values for correct jogl shading, like backface culling and depth testing.
+     */
+    private void initShadingParameters() {
+        gl.glClearColor(.1f, .1f, .1f, 1f);
+        gl.glClearDepth(1.0f);
         gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glDepthFunc(GL.GL_LESS);
         gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
         gl.glCullFace(GL.GL_BACK);
         gl.glEnable(GL.GL_CULL_FACE);
         gl.glShadeModel(GL.GL_SMOOTH);
-        
-		int v = gl.glCreateShader(GL.GL_VERTEX_SHADER);
-		int f = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
-		
-		String[] fsrc = loadShader("checker.frag");
-		String[] vsrc = loadShader("checker.vert");
-		
-		gl.glShaderSource(v, 1, vsrc, null, 0);
-		gl.glCompileShader(v);
-		
-		gl.glShaderSource(f, 1, fsrc, null, 0);
-		gl.glCompileShader(f);
-
-		int shaderprogram = gl.glCreateProgram();
-		gl.glAttachShader(shaderprogram, v);
-		gl.glAttachShader(shaderprogram, f);
-		gl.glLinkProgram(shaderprogram);
-		gl.glValidateProgram(shaderprogram);
-        IntBuffer intBuffer = IntBuffer.allocate(1);
-        gl.glGetProgramiv(shaderprogram, GL.GL_LINK_STATUS, intBuffer);
-        
-        if (intBuffer.get(0) != 1)
-        {
-            gl.glGetProgramiv(shaderprogram, GL.GL_INFO_LOG_LENGTH, intBuffer);
-            int size = intBuffer.get(0);
-            System.err.println("Program link error: ");
-            if (size > 0)
-            {
-                ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-                gl.glGetProgramInfoLog(shaderprogram, size, intBuffer, byteBuffer);
-                for (byte b : byteBuffer.array())
-                {
-                    System.err.print((char) b);
-                }
-            }
-            else
-            {
-                System.out.println("Unknown");
-            }
-            System.exit(1);
-        }
-
-		gl.glUseProgram(shaderprogram);
-	}
-    
-	
-	public String[] loadShader( String name )
-    {
-        StringBuilder sb = new StringBuilder();
-        try
-        {
-            InputStream is = getClass().getResourceAsStream(name);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String line;
-            while ((line = br.readLine()) != null)
-            {
-                sb.append(line);
-                sb.append('\n');
-            }
-            is.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return new String[]
-        { sb.toString() };
     }
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
@@ -332,36 +268,6 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
             mouseY = y;
             canvas.display();
         }
-    }
-
-
-    /* computes optimal transformation parameters for OpenGL rendering.
-     * this is based on an estimate of the scene's bounding box
-     */
-    void initViewParameters() {
-        roth = rotv = 0;
-
-        /*
-        float ball_r = (float) Math.sqrt((xmax - xmin) * (xmax - xmin)
-                + (ymax - ymin) * (ymax - ymin)
-                + (zmax - zmin) * (zmax - zmin)) * 0.707f;
-
-        centerx = (xmax + xmin) / 2.f;
-        centery = (ymax + ymin) / 2.f;
-        centerz = (zmax + zmin) / 2.f;
-        xpos = centerx;
-        ypos = centery;
-        zpos = ball_r / (float) Math.sin(45.f * Math.PI / 180.f) + centerz;
-        */
-
-
-        znear = 0.01f;
-        zfar = 1000.f;
-
-
-        motionSpeed = 0.002f;
-        rotateSpeed = 0.1f;
-
     }
 
     // these event functions are not used for this assignment
