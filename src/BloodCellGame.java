@@ -6,30 +6,29 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.*;
+import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import java.awt.event.*;
+import javax.vecmath.Vector4f;
 
-class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener {
+import java.awt.event.*;
+import java.io.*;
+
+class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener, WorldSpaceUpdateListener, WorldSpaceCollisionListener {
 
     /* GL, display, model transformation, and mouse control variables */
     private final GLCanvas canvas;
     private final GLU glu = new GLU();
     BranchedTube first;
+    Shader shader;
     private GL gl;
-    private FPSAnimator animator;
     private int winW = 800, winH = 800;
     private boolean wireframe = false;
     private boolean cullface = true;
     private boolean flatshade = false;
-    private float xpos = 0, ypos = 0, zpos = 0;
-    private float centerx, centery, centerz;
-    private float roth = 0, rotv = 0.1f;
     private float znear, zfar;
-    private int mouseX, mouseY, mouseButton;
-    private float motionSpeed, rotateSpeed;
-    private float animation_speed = 1.0f;
-    private float rotate_param = 0;
 
+    
+    private WorldSpace WORLDSPACE;
     public BloodCellGame() {
         super("Blood Cell Game");
         canvas = new GLCanvas();
@@ -37,65 +36,32 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         canvas.addKeyListener(this);
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
-        animator = new FPSAnimator(canvas, 30);    // create a 30 fps animator
+        //animator = new FPSAnimator(canvas, 60);    // create a 30 fps animator
         getContentPane().add(canvas);
         setSize(winW, winH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
-        animator.start();
+        //animator.start();
         canvas.requestFocus();
 
     }
-
     public static void main(String[] args) {
-
+    	
         new BloodCellGame();
     }
-
     public void keyPressed(KeyEvent e) {
+    	WORLDSPACE.keyPressed(e);
+    	
         switch (e.getKeyCode()) {
             case KeyEvent.VK_ESCAPE:
-            case KeyEvent.VK_Q:
                 System.exit(0);
                 break;
-            case 'r':
-            case 'R':
-                initViewParameters();
-                break;
-            case 'w':
-            case 'W':
-                wireframe = !wireframe;
-                break;
-            case 'b':
-            case 'B':
-                cullface = !cullface;
-                break;
-            case 'f':
-            case 'F':
-                flatshade = !flatshade;
-                break;
-            case 'a':
-            case 'A':
-                if (animator.isAnimating())
-                    animator.stop();
-                else
-                    animator.start();
-                break;
-            case '+':
-            case '=':
-                animation_speed *= 1.2f;
-                break;
-            case '-':
-            case '_':
-                animation_speed /= 1.2;
-                break;
-            default:
-                break;
         }
-        canvas.display();
     }
-
+    public void keyReleased(KeyEvent e) {
+    	WORLDSPACE.keyReleased(e);
+    }
     public void display(GLAutoDrawable drawable) {
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
@@ -107,54 +73,94 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
             gl.glDisable(GL.GL_CULL_FACE);
 
         gl.glLoadIdentity();
-
-		/* this is the transformation of the entire scene */
-
-        moveCamera();
-
-        gl.glPushMatrix();    // push the current matrix to stack
-        if (first == null) {
-            first = new BranchedTube(gl);
-        }
-        first.draw(3);
-        Vector3f camera = first.getCamera(0);
-        glu.gluLookAt(0, -1, 0, 1, 0, 0, 0, 0, 1);
-
-        gl.glPopMatrix();
+        //moveCamera();
+        
+//        gl.glPushMatrix();    // push the current matrix to stack
+//        if (first == null) {
+//            first = new BranchedTube(gl);
+//        }
+//        first.draw(3);
+//        glu.gluLookAt(0, -1, 0, 1, 0, 0, 0, 0, 1);
+//
+//        gl.glPopMatrix();
+        
+    	WORLDSPACE.draw();
     }
 
-    private void moveCamera() {
-        gl.glTranslatef(-xpos, -ypos, -zpos);
-        gl.glTranslatef(centerx, centery, centerz);
-        gl.glRotatef(360.f - roth, 0, 1.0f, 0);
-        gl.glRotatef(rotv, 1.0f, 0, 0);
-        gl.glRotatef(-90, 1.0f, 0, 0);
-        gl.glRotatef(rotate_param, 0, 1f, 0);
-        gl.glTranslatef(-centerx, -centery, -centerz);
-    }
+	public void worldSpaceCollision(WorldObject o1, WorldObject o2) {
+		System.out.println("Collision "+o1.getName()+" and "+o2.getName());
+		if(o1 == WORLDSPACE.getCameraObject()){
+			o1.applyScale(new Vector3f(.0005f,.0005f,.0005f));
+			o1.setRadius(o1.getRadius()+.00025f);
+			WORLDSPACE.deleteWorldObject(o2);
+		} else if(o2 == WORLDSPACE.getCameraObject()){
+			o2.applyScale(new Vector3f(.0005f,.0005f,.0005f));
+			o2.setRadius(o2.getRadius()+.00025f);
+			WORLDSPACE.deleteWorldObject(o1);
+		}
+	}
+	
+	public void worldSpaceUpdate(WorldSpace space, float delta) {
+//		System.out.println("Update");
+	}
+    
+    public void init(GLAutoDrawable drawable) {
+        gl = drawable.getGL();
+        znear = 0.01f;
+        zfar = 1000.f;
+        WORLDSPACE = new WorldSpace(gl, canvas);
+        WorldObject cam = WORLDSPACE.addWorldObject("Cam", "models/white_blood_cell.obj",1);
+        WorldObject obj2 = WORLDSPACE.addWorldObject("Test2", "models/red_blood_cell.obj",2);
+        WorldObject obj1 = WORLDSPACE.addWorldObject("Test1", "models/red_blood_cell.obj",2);
+        WorldObject obj0 = WORLDSPACE.addWorldObject("Test0", "models/red_blood_cell.obj",2);
+        WorldObject obj3 = WORLDSPACE.addWorldObject("Test3", "models/red_blood_cell.obj",2);
+        WorldObject obj4 = WORLDSPACE.addWorldObject("Test4", "models/straight_tube.obj",3);
+//        WorldObject obj5 = WORLDSPACE.addWorldObject("Forward", "models/white_blood_cell.obj");
+//        WorldObject obj5 = TESTSPACE.addWorldObject("Test1", "models/white_blood_cell.obj");
+        obj0.setScale(new Vector3f(.005f,.005f,.005f));
+        obj0.setPosition(new Vector3f(0, .00f, -.03f));
+        obj0.setPosition(new Vector3f(0, .00f, -.03f));
+        obj0.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+        obj0.setRadius(.0025f);
+        
+        obj1.setScale(new Vector3f(.005f,.005f,.005f));
+        obj1.setPosition(new Vector3f(0, -.03f, 0));
+        obj1.setPosition(new Vector3f(0, 0, -.09f));
+        obj1.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+        obj1.setRadius(.0025f);
+        
+        obj2.setScale(new Vector3f(.005f,.005f,.005f));
+        obj2.setPosition(new Vector3f(-.03f, .00f, 0));
+        obj2.setPosition(new Vector3f(0, .00f, -.06f));
+        obj2.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+        obj2.setRadius(.0025f);
+        
+        obj3.setScale(new Vector3f(.005f,.005f,.005f));
+        obj3.setPosition(new Vector3f(0, .01f, -.06f));
+        obj3.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+        obj3.setRadius(.0025f);
 
-    private void set_material() {
-        //material
-        float mat_ambient[] = {0.6f, 0.6f, 0.6f, 1};
-        float mat_specular[] = {0f, 0f, 0f, 1};
-        float mat_diffuse[] = {.6f, .6f, .6f, 1};
-        float mat_shininess[] = {1};
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT, mat_ambient, 0);
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_SPECULAR, mat_specular, 0);
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, mat_diffuse, 0);
-        gl.glMaterialfv(GL.GL_FRONT, GL.GL_SHININESS, mat_shininess, 0);
+        obj4.setScale(new Vector3f(.2f,.2f,.2f));
+        obj4.setRotation(0,90,0);
+        
+//        obj5.setScale(new Vector3f(.005f,.005f,.005f));
+//        obj5.setRadius(.002f);
+        
+        cam.setScale(new Vector3f(.005f,.005f,.005f));
+        cam.setPosition(new Vector3f(0, 0, 0));
+        cam.setRadius(.0025f);
+        //forward object
+        
+        WORLDSPACE.setCameraObject(cam);
+        WORLDSPACE.registerCollisionListener(this);
+        WORLDSPACE.registerUpdateListener(this);
+        WORLDSPACE.startUpdating();
+        WORLDSPACE.startRendering();
+        
+    
+        gl.glClearColor(.1f, .1f, .1f, 1f);
+        gl.glClearDepth(1.0f);
 
-        float bmat_ambient[] = {0, 0, 0, 1};
-        float bmat_specular[] = {0, .8f, .8f, 1};
-        float bmat_diffuse[] = {0, .4f, .4f, 1};
-        float bmat_shininess[] = {128};
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_AMBIENT, bmat_ambient, 0);
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_SPECULAR, bmat_specular, 0);
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, bmat_diffuse, 0);
-        gl.glMaterialfv(GL.GL_BACK, GL.GL_SHININESS, bmat_shininess, 0);
-    }
-
-    public void init_lights() {
         // white light at the eye
         float light0_position[] = {0, 0, 1, 0};
         float light0_diffuse[] = {1, 1, 1, 1};
@@ -174,55 +180,49 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         float position[] = {.1f, .1f, 0, 0};
         float diffuse[] = {.05f, .05f, .6f, 1};
         float specular[] = {.05f, .05f, .6f, 1};
+        float spotDirection[] = {-1.0f, -1.0f, 0.f};
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_POSITION, position, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_DIFFUSE, diffuse, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_SPECULAR, specular, 0);
-    }
 
-    @Override
-    /**
-     * Initializes shading parameters and view parameters
-     * @param drawable
-     */
-    public void init(GLAutoDrawable drawable) {
-        gl = drawable.getGL();
+//        //material
+//        float mat_ambient[] = {0, 0, 0, 1};
+//        float mat_specular[] = {.8f, .8f, .8f, 1};
+//        float mat_diffuse[] = {.4f, .4f, .4f, 1};
+//        float mat_shininess[] = {128};
+//        gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT, mat_ambient, 0);
+//        gl.glMaterialfv(GL.GL_FRONT, GL.GL_SPECULAR, mat_specular, 0);
+//        gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, mat_diffuse, 0);
+//        gl.glMaterialfv(GL.GL_FRONT, GL.GL_SHININESS, mat_shininess, 0);
+//
+//        float bmat_ambient[] = {0, 0, 0, 1};
+//        float bmat_specular[] = {0, .8f, .8f, 1};
+//        float bmat_diffuse[] = {0, .4f, .4f, 1};
+//        float bmat_shininess[] = {128};
+//        gl.glMaterialfv(GL.GL_BACK, GL.GL_AMBIENT, bmat_ambient, 0);
+//        gl.glMaterialfv(GL.GL_BACK, GL.GL_SPECULAR, bmat_specular, 0);
+//        gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, bmat_diffuse, 0);
+//        gl.glMaterialfv(GL.GL_BACK, GL.GL_SHININESS, bmat_shininess, 0);
+//
+//        float lmodel_ambient[] = {0, 0, 0, 1};
+//        gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient, 0);
+//        gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, 1);
 
-        initViewParameters();
-        initShadingParameters();
-        init_lights();
+        gl.glEnable(GL.GL_NORMALIZE);
+        gl.glEnable(GL.GL_LIGHTING);
+        gl.glEnable(GL.GL_LIGHT0);
+        gl.glEnable(GL.GL_LIGHT1);
+        gl.glEnable(GL.GL_LIGHT2);
 
-		Shader shader = new Shader(gl);
-        shader.load("shaders/checker.vert", Shader.Type.VERTEX);
-        shader.load("shaders/checker.frag", Shader.Type.FRAGMENT);
-		shader.link();
-	}
-
-    /**
-     * Sets parameters so that objects are in view, and animation speeds are correct.
-     */
-    void initViewParameters() {
-        roth = rotv = 0;
-
-        znear = 0.01f;
-        zfar = 1000.f;
-
-        motionSpeed = 0.002f;
-        rotateSpeed = 0.1f;
-    }
-
-    /**
-     * Initializes values for correct jogl shading, like backface culling and depth testing.
-     */
-    private void initShadingParameters() {
-        gl.glClearColor(.1f, .1f, .1f, 1f);
-        gl.glClearDepth(1.0f);
         gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glDepthFunc(GL.GL_LESS);
         gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
         gl.glCullFace(GL.GL_BACK);
         gl.glEnable(GL.GL_CULL_FACE);
         gl.glShadeModel(GL.GL_SMOOTH);
-    }
+        
+		
+	}
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
         winW = width;
@@ -234,64 +234,30 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         glu.gluPerspective(45.f, (float) width / (float) height, znear, zfar);
         gl.glMatrixMode(GL.GL_MODELVIEW);
     }
-
     public void mousePressed(MouseEvent e) {
-        mouseX = e.getX();
-        mouseY = e.getY();
-        mouseButton = e.getButton();
-        canvas.display();
+    	WORLDSPACE.mousePressed(e);
     }
-
     public void mouseReleased(MouseEvent e) {
-        mouseButton = MouseEvent.NOBUTTON;
-        canvas.display();
+    	WORLDSPACE.mouseReleased(e);
     }
-
     public void mouseDragged(MouseEvent e) {
-        int x = e.getX();
-        int y = e.getY();
-        if (mouseButton == MouseEvent.BUTTON3) {
-            zpos -= (y - mouseY) * motionSpeed;
-            mouseX = x;
-            mouseY = y;
-            canvas.display();
-        } else if (mouseButton == MouseEvent.BUTTON2) {
-            xpos -= (x - mouseX) * motionSpeed;
-            ypos += (y - mouseY) * motionSpeed;
-            mouseX = x;
-            mouseY = y;
-            canvas.display();
-        } else if (mouseButton == MouseEvent.BUTTON1) {
-            roth -= (x - mouseX) * rotateSpeed;
-            rotv += (y - mouseY) * rotateSpeed;
-            mouseX = x;
-            mouseY = y;
-            canvas.display();
-        }
+    	WORLDSPACE.mouseDragged(e);
     }
-
+    public void mouseMoved(MouseEvent e) {
+//    	WORLDSPACE.mouseMoved(e);
+    }
     // these event functions are not used for this assignment
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
     }
-
     public void keyTyped(KeyEvent e) {
-    }
-
-    public void keyReleased(KeyEvent e) {
-    }
-
-    public void mouseMoved(MouseEvent e) {
     }
 
     public void actionPerformed(ActionEvent e) {
     }
-
     public void mouseClicked(MouseEvent e) {
     }
-
     public void mouseEntered(MouseEvent e) {
     }
-
     public void mouseExited(MouseEvent e) {
     }
 }

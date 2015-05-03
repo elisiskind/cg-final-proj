@@ -7,10 +7,8 @@ import javax.vecmath.Vector3f;
 public class StraightTube extends Tube {
 
     private Tube child = null;
-    private static float min = -0.1f;
-    private static float max = 1.1f;
-    private static Vector3f childOffset = new Vector3f(0f, max, 0f);
-    private static Vector3f offset = new Vector3f(0f, min, 0f);
+    private static Vector3f childOffset = new Vector3f(0f, 1.1f, 0f);
+    private static Vector3f offset = new Vector3f(0f, -0.1f, 0f);
 
     public StraightTube(GL gl) {
         super(gl);
@@ -31,8 +29,7 @@ public class StraightTube extends Tube {
 
     @Override
     public Vector3f getCamera(float t) {
-        float y = (max - min)*t - (max - min)/2;
-        return new Vector3f(0, y, 0);
+        return null;
     }
 
     /** Draw the child and its children recursively
