@@ -8,14 +8,24 @@ import java.util.Random;
  * Created by eli on 4/28/2015.
  */
 public abstract class Tube extends DrawableObject {
-    private static Random random;
+    protected static Random random;
     protected GLU glu;
     protected WhiteBloodCell whiteBloodCell;
+    RedBloodCell redBloodCelllist[];
+    Vector3f cellPositions[];
 
     public Tube(String file, GL gl, GLU glu, WhiteBloodCell whiteBloodCell) {
         super(file, gl);
         this.glu = glu;
         this.whiteBloodCell = whiteBloodCell;
+        redBloodCelllist = new RedBloodCell[3];
+        cellPositions = new Vector3f[3];
+
+        for(int i = 0; i < 3; i++) {
+            redBloodCelllist[i] = new RedBloodCell(gl);
+            cellPositions[i] = new Vector3f((float)Math.random() * 0.2f - 0.1f, (float)Math.random() * 0.2f - 0.1f, (float)Math.random()*0.5f - 0.25f);
+        }
+
         random = new Random();
     }
 
@@ -29,7 +39,7 @@ public abstract class Tube extends DrawableObject {
 
     protected void drawWhiteBloodCell(Vector3f position) {
         gl.glPushMatrix();
-        gl.glTranslatef(position.x, position.y-0.1f, position.z - 0.3f);
+        gl.glTranslatef(position.x, position.y - 0.1f, position.z - 0.3f);
         whiteBloodCell.draw();
         gl.glPopMatrix();
     }
@@ -50,6 +60,16 @@ public abstract class Tube extends DrawableObject {
     abstract public Tube getChild();
 
     abstract public void draw(int depth, float t, boolean first);
+
+    protected void drawRedBloodCells(){
+        for(int i = 0; i < 3; i++) {
+            gl.glPushMatrix();
+            gl.glTranslatef(cellPositions[i].x, cellPositions[i].y, cellPositions[i].z);
+            redBloodCelllist[i].draw();
+            gl.glPopMatrix();
+        }
+
+    }
 
     abstract public void positionCamera(float t);
 

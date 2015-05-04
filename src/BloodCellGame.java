@@ -110,23 +110,15 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
 
 		/* this is the transformation of the entire scene */
 
-        moveCamera();
+//        moveCamera();
         updateScene();
 
     }
 
     private void updateScene() {
         if(first == null) first = new BranchedTube(gl, glu, new WhiteBloodCell(gl, glu));
-//
-//        Vector3f camera = first.getCamera(t);
-//        Vector3f lookAt = first.getCamera(t + 0.01f);
-//
-//        gl.glTranslatef(camera.x, camera.y, camera.z);
-//        if(first.getClass() == BranchedTube.class){
-//            gl.glRotatef(first.getCameraAngle(t),0, 1, 0);
-//        }
 
-        first.draw(3, t, true);
+        first.draw(2, t, true);
 
         t += 0.02;
 

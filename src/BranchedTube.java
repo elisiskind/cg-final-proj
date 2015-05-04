@@ -10,29 +10,39 @@ public class BranchedTube extends Tube {
     private Tube left = null;
     private Tube right = null;
     private float rotate;
-    private float translations[] = {-0.92f, -0.05f};
+    private final float translations[] = {-0.92f, -0.05f};
     private static float childRotation = 45;
     private RedBloodCell cell;
+    private boolean nextIsLeft;
 
     public BranchedTube(GL gl, GLU glu, WhiteBloodCell whiteBloodCell) {
         super("models/branch.obj", gl, glu, whiteBloodCell);
-        rotate = (float) Math.random() * 90f;
+        nextIsLeft = random.nextBoolean();
     }
 
     @Override
     public void draw(int depth, float t, boolean first) {
+
         gl.glPushMatrix();
 //        gl.glRotatef(rotate, 0, 0, 1);
 
         if(first) positionCamera(t);
         this.draw();
-
-        if(cell == null) cell = new RedBloodCell(gl);
-        cell.draw();
+        drawRedBloodCells();
 
         if (depth-- > 0) {
-            drawRight(depth);
-            drawLeft(depth);
+            gl.glPushMatrix();
+            if(nextIsLeft)
+                drawLeft(depth);
+            else
+                drawRight(depth);
+            gl.glPopMatrix();
+            gl.glPushMatrix();
+            if(nextIsLeft)
+                drawRight(depth);
+            else
+                drawLeft(depth);
+            gl.glPopMatrix();
         }
 
         gl.glPopMatrix();
@@ -47,48 +57,50 @@ public class BranchedTube extends Tube {
 
     @Override
     public void positionCamera(float t) {
-        Vector3f camera = new Vector3f(0, 0, t * -1.06f);
+        float scalar = nextIsLeft ? -1 : 1;
+
+        Vector3f camera = new Vector3f(0, 0, t * -1.07f);
         if(t >= 0.8) {
-            camera.x += 1.05 * (t - 0.8);
-            camera.z *= 0.9f;
+            camera.x += 1.05 * scalar * (t - 0.8);
+            camera.z *= 1.1f;
         }
 
         float x = 0;
         if(t > 0.6 && t <= 0.8) {
-            x = ((t - 0.6f)/0.2f * 100);
-        } else if (t >= 0.8){
-            x = 100;
+            x = scalar * ((t - 0.6f)/0.2f * 100);
+        } else if (t > 0.8){
+            x = scalar * 100;
         }
 
         glu.gluLookAt(camera.x, camera.y, camera.z, -camera.x + x, -camera.y, -camera.z - 100, 0, 1, 0);
+
+        if(t > 0.75){
+            camera.x += scalar * (t - 0.75f);
+        }
 
         drawWhiteBloodCell(camera);
     }
 
     public Tube getChild() {
-        return right;
+        return nextIsLeft ? right : left;
     }
 
     /** Draw the right branch **/
     private void drawRight(int depth) {
         if (right == null) right = makeChild();
-        gl.glPushMatrix();
         gl.glTranslatef(0, 0, translations[0]);
         gl.glRotatef(-childRotation, 0, 1, 0);
         gl.glTranslatef(0, 0, translations[1]);
         right.draw(depth, 0, false);
-        gl.glPopMatrix();
     }
 
     /** Draw the left branch **/
     private void drawLeft(int depth) {
         if (left == null) left = makeChild();
-        gl.glPushMatrix();
         gl.glTranslatef(0, 0, translations[0]);
         gl.glRotatef(childRotation, 0, 1, 0);
         gl.glTranslatef(0, 0, translations[1]);
         left.draw(depth, 0, false);
-        gl.glPopMatrix();
     }
 
 
