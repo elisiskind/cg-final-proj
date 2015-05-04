@@ -47,14 +47,14 @@ public abstract class Tube extends DrawableObject {
     }
 
     protected void setShader() {
-        float  MaterialThickness = 0.2f;
+        float  MaterialThickness = 0.01f;
         Vector3f ExtinctionCoefficient = new Vector3f(0.1f,0.1f,0.1f);
         Vector4f LightColor = new Vector4f(0.1f,0.0f,0.0f,0.2f);
         Vector4f BaseColor = new Vector4f(0.1f,0.0f,0.0f,0.0f);
         Vector4f SpecColor = new Vector4f(0.1f,0.0f,0.0f,0.2f);
         float SpecPower = 0.2f;
         float RimScalar = 22.0f;
-        Vector3f LightPosition = new Vector3f(0f,0f,-0.27f);
+        Vector3f LightPosition = new Vector3f(0.0f,4.0f,-2.0f);
         shader.setUniformVariables(MaterialThickness, ExtinctionCoefficient, LightColor, BaseColor, SpecColor, SpecPower, RimScalar, LightPosition);
         shader.useShader();
     }

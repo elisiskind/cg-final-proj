@@ -220,7 +220,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
      * Initializes values for correct jogl shading, like backface culling and depth testing.
      */
     private void initShadingParameters() {
-        gl.glClearColor(.1f, .1f, .1f, 1f);
+        gl.glClearColor(0.1f,0.0f,0.0f,0.0f);
         gl.glClearDepth(1.0f);
         gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glDepthFunc(GL.GL_LESS);
