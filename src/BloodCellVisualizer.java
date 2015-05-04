@@ -11,7 +11,7 @@ import javax.vecmath.Vector2f;
 import java.awt.*;
 import java.awt.event.*;
 
-class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener {
+class BloodCellVisualizer extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener {
 
     /* GL, display, model transformation, and mouse control variables */
     private final GLCanvas canvas;
@@ -38,8 +38,8 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
 
     public static Vector2f position = new Vector2f(0, 0);
 
-    public BloodCellGame() {
-        super("Blood Cell Game");
+    public BloodCellVisualizer() {
+        super("Blood Cell Visualizer");
         canvas = new GLCanvas();
         canvas.addGLEventListener(this);
         canvas.addKeyListener(this);
@@ -58,7 +58,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
 
     public static void main(String[] args) {
 
-        new BloodCellGame();
+        new BloodCellVisualizer();
     }
 
     public void keyPressed(KeyEvent e) {
