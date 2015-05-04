@@ -42,6 +42,10 @@ public class Shader {
 
     }
 
+    public void useShader() {
+        gl.glUseProgram(shaderprogram);
+    }
+
     public void link() {
         gl.glLinkProgram(shaderprogram);
         gl.glValidateProgram(shaderprogram);
@@ -68,7 +72,7 @@ public class Shader {
             }
             System.exit(1);
         }
-        gl.glUseProgram(shaderprogram);
+        //gl.glUseProgram(shaderprogram);
     }
 
     public String[] readFile(String name) {
@@ -92,7 +96,19 @@ public class Shader {
         return new String[]
                 { sb.toString() };
     }
-    
+
+    public void init() {
+        float  MaterialThickness = 0.01f;
+        Vector3f ExtinctionCoefficient = new Vector3f(0.1f,0.1f,0.1f);
+        Vector4f LightColor = new Vector4f(0.5f,0.1f,0.1f,0.0f);
+        Vector4f BaseColor = new Vector4f(1.0f,1.0f,1.0f,0.0f);
+        Vector4f SpecColor = new Vector4f(0.2f,0.2f,0.2f,0.0f);
+        float SpecPower = 0.2f;
+        float RimScalar = 22.0f;
+        Vector3f LightPosition = new Vector3f(0.0f,4.0f,-2.0f);
+        setUniformVariables(MaterialThickness, ExtinctionCoefficient, LightColor, BaseColor, SpecColor, SpecPower, RimScalar, LightPosition);
+    }
+
     public void setUniformVariables(float MaterialThickness, Vector3f ExtinctionCoefficient, Vector4f LightColor, Vector4f BaseColor, Vector4f SpecColor, float SpecPower, float RimScalar, Vector3f LightPosition) {
     	int loc1 = gl.glGetUniformLocation(shaderprogram, "MaterialThickness");
     	gl.glUniform1f(loc1, MaterialThickness);

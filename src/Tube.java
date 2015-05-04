@@ -1,44 +1,61 @@
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 import javax.vecmath.Vector3f;
+import javax.vecmath.Vector4f;
 import java.util.Random;
 
 /**
  * Created by eli on 4/28/2015.
  */
-public abstract class Tube {
-    private static ObjModel straightTubeGeometry = null;
-    private static ObjModel branchedTubeGeometry = null;
+public abstract class Tube extends DrawableObject {
     private static Random random;
-    protected GL gl;
+    protected GLU glu;
+    protected WhiteBloodCell whiteBloodCell;
 
-    public Tube(GL gl) {
-        this.gl = gl;
+    public Tube(String file, GL gl, GLU glu, WhiteBloodCell whiteBloodCell) {
+        super(file, gl);
+        this.glu = glu;
+        this.whiteBloodCell = whiteBloodCell;
         random = new Random();
     }
 
-    protected static ObjModel getStraightTube() {
-        if (straightTubeGeometry == null) {
-            straightTubeGeometry = new ObjModel("models/straight_tube.obj");
-        }
-        return straightTubeGeometry;
-    }
-
-    protected static ObjModel getBranchedTube() {
-        if (branchedTubeGeometry == null) {
-            branchedTubeGeometry = new ObjModel("models/branch_tube.obj");
-        }
-        return branchedTubeGeometry;
-    }
-
     protected Tube makeChild() {
-        if(random.nextBoolean()) {
-            return new BranchedTube(gl);
+        if(random.nextBoolean() && random.nextBoolean()) {
+            return new BranchedTube(gl, glu, whiteBloodCell);
         } else {
-            return new StraightTube(gl);
+            return new StraightTube(gl, glu, whiteBloodCell);
         }
     }
 
-    abstract public void draw(int depth);
+    protected void drawWhiteBloodCell(Vector3f position) {
+        gl.glPushMatrix();
+        gl.glTranslatef(position.x, position.y-0.1f, position.z - 0.3f);
+        whiteBloodCell.draw();
+        gl.glPopMatrix();
+    }
 
-    abstract public Vector3f getCamera(float t);
+    protected void init() {
+        shader = new Shader(gl);
+        shader.load("shaders/sss.vert", Shader.Type.VERTEX);
+        shader.load("shaders/sss.frag", Shader.Type.FRAGMENT);
+        shader.link();
+
+        float  MaterialThickness = 0.01f;
+        Vector3f ExtinctionCoefficient = new Vector3f(0.1f,0.1f,0.1f);
+        Vector4f LightColor = new Vector4f(0.5f,0.1f,0.1f,0.0f);
+        Vector4f BaseColor = new Vector4f(1.0f,1.0f,1.0f,0.0f);
+        Vector4f SpecColor = new Vector4f(0.2f,0.2f,0.2f,0.0f);
+        float SpecPower = 0.2f;
+        float RimScalar = 22.0f;
+        Vector3f LightPosition = new Vector3f(0.0f,4.0f,-2.0f);
+        shader.setUniformVariables(MaterialThickness, ExtinctionCoefficient, LightColor, BaseColor, SpecColor, SpecPower, RimScalar, LightPosition);
+    }
+
+    abstract public Tube getChild();
+
+    abstract public void draw(int depth, float t, boolean first);
+
+    abstract public void positionCamera(float t);
+
+
 }
