@@ -75,6 +75,9 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
             case KeyEvent.VK_RIGHT :
                 if(position.x < 0.05) position.x += 0.006;
                 break;
+            case KeyEvent.VK_Q:
+                System.exit(0);
+                break;
         }
         canvas.display();
     }
