@@ -1,7 +1,5 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.AWTException;
-import java.awt.Robot;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +93,7 @@ public class WorldSpace {
 		Vector4f LightColor = new Vector4f(0.5f,0.1f,0.1f,0.0f);
 		Vector4f BaseColor = new Vector4f(1.0f,1.0f,1.0f,0.0f);
 		Vector4f SpecColor = new Vector4f(0.2f,0.2f,0.2f,0.0f);
-		float SpecPower = 0.2f;
+		float SpecPower = 22f;
 		float RimScalar = 22.0f;
 		Vector3f LightPosition = new Vector3f(0.0f,4.0f,-2.0f);
 		shader.setUniformVariables(MaterialThickness, ExtinctionCoefficient, LightColor, BaseColor, SpecColor, SpecPower, RimScalar, LightPosition);
@@ -179,7 +177,7 @@ public class WorldSpace {
 					}
 					
 					if(camYRotateFactor != 0){
-						camYRotateVal += camYRotateFactor * delta * 180;
+						camYRotateVal -= camYRotateFactor * delta * 180;
 						this.camObject.setRotY(camYRotateVal);
 					}
 					
@@ -293,17 +291,36 @@ public class WorldSpace {
 		int i = obj.getShader();
 		if (i!=0){
 			switch(obj.getShader()) {
-				case 1: shader.setBaseColor(new Vector4f(1.0f,1.0f,1.0f,0.0f)); //white blood cell
+				case 1: shader.setBaseColor(new Vector4f(0.7f,0.7f,0.7f,0.4f)); //white blood cell
 						shader.setLightColor(new Vector4f(0.3f,0.3f,0.3f,0.0f));
+						shader.setSpecColor(new Vector4f(0.5f,0.0f,0.5f,0.0f));
+						shader.setLightPosition(new Vector3f(0.0f,0.2f,-1.0f));
+						shader.setExtinctionCoefficient(new Vector3f(7f,4f,7f));
+						shader.setMaterialThickness(0.015f);
 						break;
 						
 				case 2: shader.setBaseColor(new Vector4f(1.0f,1.0f,1.0f,0.0f)); //red blood cell
 		        		shader.setLightColor(new Vector4f(0.5f,0.1f,0.1f,0.0f));
+						shader.setSpecColor(new Vector4f(0.2f,0.2f,0.2f,0.0f));
+						shader.setLightPosition(new Vector3f(0.0f,0.0f,-2.0f));
+						shader.setExtinctionCoefficient(new Vector3f(10,2,2f));
+						shader.setMaterialThickness(0.01f);
 		        		break;
 						
-				case 3: shader.setBaseColor(new Vector4f(1.0f,1.0f,1.0f,0.0f)); //tube
-						shader.setLightColor(new Vector4f(0.5f,0.1f,0.1f,0.0f));
-						shader.setLightPosition(new Vector3f(0.0f,0.0f,10.0f));
+				case 3: shader.setBaseColor(new Vector4f(0.1f,0.0f,0.0f,0.0f)); //tube
+						shader.setLightColor(new Vector4f(0.1f,0.0f,0.0f,0.2f));
+						shader.setSpecColor(new Vector4f(0.1f,0.0f,0.0f,0.2f));
+						shader.setLightPosition(new Vector3f(0f,0f,-0.27f));
+						shader.setExtinctionCoefficient(new Vector3f(0.1f,0.1f,0.1f));
+						shader.setMaterialThickness(0.2f);
+						break;
+						
+				case 4: shader.setBaseColor(new Vector4f(0.3f,0.4f,0.0f,0.0f)); //bacteria
+						shader.setLightColor(new Vector4f(0.1f,0.1f,0.0f,0.2f));
+						shader.setSpecColor(new Vector4f(0.f,0.1f,0.0f,0.2f));
+						shader.setLightPosition(new Vector3f(0f,0f,-0.27f));
+						shader.setExtinctionCoefficient(new Vector3f(0.1f,0.1f,0.1f));
+						shader.setMaterialThickness(0.01f);
 						break;
 			}
 		}

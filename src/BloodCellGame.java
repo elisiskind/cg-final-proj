@@ -1,17 +1,11 @@
-import com.sun.opengl.util.FPSAnimator;
-
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.*;
-import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import javax.vecmath.Vector4f;
-
 import java.awt.event.*;
-import java.io.*;
 
 class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener, WorldSpaceUpdateListener, WorldSpaceCollisionListener {
 
@@ -19,7 +13,6 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     private final GLCanvas canvas;
     private final GLU glu = new GLU();
     BranchedTube first;
-    Shader shader;
     private GL gl;
     private int winW = 800, winH = 800;
     private boolean wireframe = false;
@@ -88,12 +81,11 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     }
 
 	public void worldSpaceCollision(WorldObject o1, WorldObject o2) {
-		System.out.println("Collision "+o1.getName()+" and "+o2.getName());
-		if(o1 == WORLDSPACE.getCameraObject()){
+		if(o1 == WORLDSPACE.getCameraObject()&&o2.getShader()==4){
 			o1.applyScale(new Vector3f(.0005f,.0005f,.0005f));
 			o1.setRadius(o1.getRadius()+.00025f);
 			WORLDSPACE.deleteWorldObject(o2);
-		} else if(o2 == WORLDSPACE.getCameraObject()){
+		} else if(o2 == WORLDSPACE.getCameraObject()&&o1.getShader()==4){
 			o2.applyScale(new Vector3f(.0005f,.0005f,.0005f));
 			o2.setRadius(o2.getRadius()+.00025f);
 			WORLDSPACE.deleteWorldObject(o1);
@@ -110,36 +102,37 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         zfar = 1000.f;
         WORLDSPACE = new WorldSpace(gl, canvas);
         WorldObject cam = WORLDSPACE.addWorldObject("Cam", "models/white_blood_cell.obj",1);
-        WorldObject obj2 = WORLDSPACE.addWorldObject("Test2", "models/red_blood_cell.obj",2);
-        WorldObject obj1 = WORLDSPACE.addWorldObject("Test1", "models/red_blood_cell.obj",2);
-        WorldObject obj0 = WORLDSPACE.addWorldObject("Test0", "models/red_blood_cell.obj",2);
-        WorldObject obj3 = WORLDSPACE.addWorldObject("Test3", "models/red_blood_cell.obj",2);
+//        WorldObject obj2 = WORLDSPACE.addWorldObject("Test2", "models/bacteria.obj",4);
+//        WorldObject obj1 = WORLDSPACE.addWorldObject("Test1", "models/red_blood_cell.obj",2);
+//        WorldObject obj0 = WORLDSPACE.addWorldObject("Test0", "models/red_blood_cell.obj",2);
+//        WorldObject obj3 = WORLDSPACE.addWorldObject("Test3", "models/white_blood_cell.obj",1);
         WorldObject obj4 = WORLDSPACE.addWorldObject("Test4", "models/straight_tube.obj",3);
 //        WorldObject obj5 = WORLDSPACE.addWorldObject("Forward", "models/white_blood_cell.obj");
 //        WorldObject obj5 = TESTSPACE.addWorldObject("Test1", "models/white_blood_cell.obj");
-        obj0.setScale(new Vector3f(.005f,.005f,.005f));
-        obj0.setPosition(new Vector3f(0, .00f, -.03f));
-        obj0.setPosition(new Vector3f(0, .00f, -.03f));
-        obj0.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
-        obj0.setRadius(.0025f);
-        
-        obj1.setScale(new Vector3f(.005f,.005f,.005f));
-        obj1.setPosition(new Vector3f(0, -.03f, 0));
-        obj1.setPosition(new Vector3f(0, 0, -.09f));
-        obj1.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
-        obj1.setRadius(.0025f);
-        
-        obj2.setScale(new Vector3f(.005f,.005f,.005f));
-        obj2.setPosition(new Vector3f(-.03f, .00f, 0));
-        obj2.setPosition(new Vector3f(0, .00f, -.06f));
-        obj2.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
-        obj2.setRadius(.0025f);
-        
-        obj3.setScale(new Vector3f(.005f,.005f,.005f));
-        obj3.setPosition(new Vector3f(0, .01f, -.06f));
-        obj3.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
-        obj3.setRadius(.0025f);
-
+//        obj0.setScale(new Vector3f(.005f,.005f,.005f));
+//        obj0.setPosition(new Vector3f(0, .00f, -.03f));
+//        obj0.setPosition(new Vector3f(0, .00f, -.03f));
+//        obj0.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+//        obj0.setRadius(.0025f);
+//        
+//        obj1.setScale(new Vector3f(.005f,.005f,.005f));
+//        obj1.setPosition(new Vector3f(0, -.03f, 0));
+//        obj1.setPosition(new Vector3f(0, 0, -.09f));
+//        obj1.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+//        obj1.setRadius(.0025f);
+//        
+//        obj2.setScale(new Vector3f(.005f,.005f,.005f));
+//        obj2.setPosition(new Vector3f(-.03f, .00f, 0));
+//        obj2.setPosition(new Vector3f(0, .00f, -.06f));
+//        obj2.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+//        obj2.setRadius(.0025f);
+//        
+//        obj3.setScale(new Vector3f(.005f,.005f,.005f));
+//        obj3.setPosition(new Vector3f(0, .01f, -.06f));
+//        obj3.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+//        obj3.setRadius(.0025f);
+//
+        obj4.setPosition(new Vector3f(0,0,-0.05f));
         obj4.setScale(new Vector3f(.2f,.2f,.2f));
         obj4.setRotation(0,90,0);
         
@@ -151,6 +144,36 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         cam.setRadius(.0025f);
         //forward object
         
+        //generate cells
+        for(int i = 0; i<99; i++){
+        	if(i%2==0){
+        		WorldObject red = WORLDSPACE.addWorldObject("Red"+i, "models/red_blood_cell.obj",2);
+        		red.setScale(new Vector3f(.005f,.005f,.005f));
+        		red.setPosition(new Vector3f((((Math.round(Math.random()))*2)-1)*(float)Math.random()*.015f, (((Math.round(Math.random()))*2)-1)*(float)Math.random()*.015f, (float)Math.random()*-.15f));
+        		red.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+                red.setRadius(.0025f);
+        	}
+        		
+        	if(i%20==0){
+        		WorldObject white = WORLDSPACE.addWorldObject("White"+i, "models/white_blood_cell.obj",1);
+        		white.setScale(new Vector3f(.005f,.005f,.005f));
+        		white.setPosition(new Vector3f((((Math.round(Math.random()))*2)-1)*(float)Math.random()*.015f, (((Math.round(Math.random()))*2)-1)*(float)Math.random()*.015f, (float)Math.random()*-.15f));
+        		white.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+        		white.setRadius(.0025f);
+        	}
+        		
+        	if(i%6==0){
+        		WorldObject bacteria = WORLDSPACE.addWorldObject("Bacteria"+i, "models/bacteria.obj",4);
+        		bacteria.setScale(new Vector3f(.005f,.005f,.005f));
+        		bacteria.setPosition(new Vector3f((((Math.round(Math.random()))*2)-1)*(float)Math.random()*.015f, (((Math.round(Math.random()))*2)-1)*(float)Math.random()*.015f, (float)Math.random()*-.15f));
+        		bacteria.setRotation(new Vector3f((float)Math.random()*360, (float)Math.random()*360,(float)Math.random()*360));
+        		bacteria.setRadius(.0025f);
+        	}
+
+        	
+        }
+
+        
         WORLDSPACE.setCameraObject(cam);
         WORLDSPACE.registerCollisionListener(this);
         WORLDSPACE.registerUpdateListener(this);
@@ -158,7 +181,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         WORLDSPACE.startRendering();
         
     
-        gl.glClearColor(.1f, .1f, .1f, 1f);
+        gl.glClearColor(.5f, 0.0f, 0.0f, 0.2f);
         gl.glClearDepth(1.0f);
 
         // white light at the eye
@@ -184,6 +207,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_POSITION, position, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_DIFFUSE, diffuse, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_SPECULAR, specular, 0);
+        gl.glLightfv(GL.GL_LIGHT2, GL.GL_SPOT_DIRECTION, spotDirection, 0);
 
 //        //material
 //        float mat_ambient[] = {0, 0, 0, 1};

@@ -143,9 +143,9 @@ public class Shader {
     	gl.glUniform1f(loc, SpecPower);
     }
     
-    public void setRimPower(float RimPower){
+    public void setRimScalar(float RimScalar){
     	int loc = gl.glGetUniformLocation(shaderprogram, "RimPower");
-    	gl.glUniform1f(loc, RimPower);
+    	gl.glUniform1f(loc, RimScalar);
     }
     
     public void setLightPosition(Vector3f LightPosition){
