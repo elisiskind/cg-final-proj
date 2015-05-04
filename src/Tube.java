@@ -39,6 +39,9 @@ public abstract class Tube extends DrawableObject {
 
     protected void drawWhiteBloodCell(Vector3f position) {
         gl.glPushMatrix();
+        position.x += BloodCellGame.position.x;
+        position.y += BloodCellGame.position.y;
+        System.out.println("Added " + BloodCellGame.position);
         gl.glTranslatef(position.x, position.y - 0.1f, position.z - 0.3f);
         whiteBloodCell.draw();
         gl.glPopMatrix();

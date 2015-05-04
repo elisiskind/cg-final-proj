@@ -7,6 +7,7 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.*;
+import javax.vecmath.Vector2f;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -35,6 +36,8 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     private TextRenderer subtitleRenderer;
     private int showText = 100;
 
+    public static Vector2f position = new Vector2f(0, 0);
+
     public BloodCellGame() {
         super("Blood Cell Game");
         canvas = new GLCanvas();
@@ -60,42 +63,17 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
 
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_ESCAPE:
-            case KeyEvent.VK_Q:
-                System.exit(0);
+            case KeyEvent.VK_UP:
+                if(position.y < 0.12) position.y += 0.006;
                 break;
-            case 'r':
-            case 'R':
-                initViewParameters();
+            case KeyEvent.VK_DOWN:
+                if(position.y > -0.01) position.y -= 0.006;
                 break;
-            case 'w':
-            case 'W':
-                wireframe = !wireframe;
+            case KeyEvent.VK_LEFT:
+                if(position.x > -0.05) position.x -= 0.006;
                 break;
-            case 'b':
-            case 'B':
-                cullface = !cullface;
-                break;
-            case 'f':
-            case 'F':
-                flatshade = !flatshade;
-                break;
-            case 'a':
-            case 'A':
-                if (animator.isAnimating())
-                    animator.stop();
-                else
-                    animator.start();
-                break;
-            case '+':
-            case '=':
-                animation_speed *= 1.2f;
-                break;
-            case '-':
-            case '_':
-                animation_speed /= 1.2;
-                break;
-            default:
+            case KeyEvent.VK_RIGHT :
+                if(position.x < 0.05) position.x += 0.006;
                 break;
         }
         canvas.display();
