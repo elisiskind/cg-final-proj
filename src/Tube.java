@@ -34,12 +34,7 @@ public abstract class Tube extends DrawableObject {
         gl.glPopMatrix();
     }
 
-    protected void init() {
-        shader = new Shader(gl);
-        shader.load("shaders/sss.vert", Shader.Type.VERTEX);
-        shader.load("shaders/sss.frag", Shader.Type.FRAGMENT);
-        shader.link();
-
+    protected void setShader() {
         float  MaterialThickness = 0.01f;
         Vector3f ExtinctionCoefficient = new Vector3f(0.1f,0.1f,0.1f);
         Vector4f LightColor = new Vector4f(0.5f,0.1f,0.1f,0.0f);
@@ -49,6 +44,7 @@ public abstract class Tube extends DrawableObject {
         float RimScalar = 22.0f;
         Vector3f LightPosition = new Vector3f(0.0f,4.0f,-2.0f);
         shader.setUniformVariables(MaterialThickness, ExtinctionCoefficient, LightColor, BaseColor, SpecColor, SpecPower, RimScalar, LightPosition);
+        shader.useShader();
     }
 
     abstract public Tube getChild();

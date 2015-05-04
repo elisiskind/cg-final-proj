@@ -14,10 +14,10 @@ public class WhiteBloodCell extends FloatingObject{
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void setShader() {
         shader.setBaseColor(new Vector4f(1.0f,1.0f,1.0f,0.0f));
-        shader.setLightColor(new Vector4f(0.5f,0.1f,0.1f,0.0f));
+        shader.setLightColor(new Vector4f(0.2f,0.2f,0.2f,0.0f));
+        shader.useShader();
     }
 
     @Override
