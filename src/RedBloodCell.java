@@ -1,4 +1,5 @@
 import javax.media.opengl.GL;
+import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
 /**
@@ -14,8 +15,12 @@ public class RedBloodCell extends FloatingObject{
 
     @Override
     protected void setShader() {
-        shader.setBaseColor(new Vector4f(4.0f,4.0f,4.0f,0.0f));
-        shader.setLightColor(new Vector4f(0.5f,0.1f,0.1f,0.0f));
+    	shader.setBaseColor(new Vector4f(1.0f,1.0f,1.0f,0.0f)); //red blood cell
+		shader.setLightColor(new Vector4f(0.5f,0.1f,0.1f,0.0f));
+		shader.setSpecColor(new Vector4f(0.2f,0.2f,0.2f,0.0f));
+		shader.setLightPosition(new Vector3f(0.0f,0.0f,-2.0f));
+		shader.setExtinctionCoefficient(new Vector3f(10,2,2f));
+		shader.setMaterialThickness(0.01f);
 //        shader.link();
         shader.useShader();
     }

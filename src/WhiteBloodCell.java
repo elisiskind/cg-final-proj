@@ -1,5 +1,6 @@
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
+import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
 /**
@@ -15,8 +16,12 @@ public class WhiteBloodCell extends FloatingObject{
 
     @Override
     protected void setShader() {
-        shader.setBaseColor(new Vector4f(1.0f,1.0f,1.0f,0.0f));
-        shader.setLightColor(new Vector4f(0.2f,0.2f,0.2f,0.0f));
+    	shader.setBaseColor(new Vector4f(0.7f,0.7f,0.7f,0.4f)); //white blood cell
+		shader.setLightColor(new Vector4f(0.3f,0.3f,0.3f,0.0f));
+		shader.setSpecColor(new Vector4f(0.5f,0.0f,0.5f,0.0f));
+		shader.setLightPosition(new Vector3f(0.0f,0.2f,-1.0f));
+		shader.setExtinctionCoefficient(new Vector3f(7f,4f,7f));
+		shader.setMaterialThickness(0.015f);
         shader.useShader();
     }
 
