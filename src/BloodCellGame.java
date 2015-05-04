@@ -1,4 +1,5 @@
 import com.sun.opengl.util.FPSAnimator;
+import com.sun.opengl.util.j2d.TextRenderer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
@@ -6,6 +7,7 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
 class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener {
@@ -29,6 +31,9 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     private float animation_speed = 1.0f;
     private float rotate_param = 0;
     private float t = 0;
+    private TextRenderer titleRenderer;
+    private TextRenderer subtitleRenderer;
+    private int showText = 100;
 
     public BloodCellGame() {
         super("Blood Cell Game");
@@ -110,8 +115,23 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
 
 		/* this is the transformation of the entire scene */
 
-//        moveCamera();
-        updateScene();
+
+        if(showText-- > 0) {
+            // optionally set the color
+            float alpha = (showText < 20) ? ((float)showText / 20f) : 1;
+
+            titleRenderer.beginRendering(drawable.getWidth(), drawable.getHeight());
+            titleRenderer.setColor(1, 0.2f, 0.2f, alpha);
+            titleRenderer.draw("Blood Cell Visualization",50, 80);
+            titleRenderer.endRendering();
+
+            subtitleRenderer.beginRendering(drawable.getWidth(), drawable.getHeight());
+            subtitleRenderer.setColor(0.7f, 0.2f, 0.2f, alpha);
+            subtitleRenderer.draw("Eli Siskind, Alex Lee",50, 50);
+            subtitleRenderer.endRendering();
+        } else {
+            updateScene();
+        }
 
     }
 
@@ -193,6 +213,8 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     public void init(GLAutoDrawable drawable) {
         gl = drawable.getGL();
 
+        titleRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
+        subtitleRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 24));
         initViewParameters();
         initShadingParameters();
         init_lights();
