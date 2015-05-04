@@ -61,7 +61,7 @@ public class BranchedTube extends Tube {
 
         Vector3f camera = new Vector3f(0, 0, t * -1.07f);
         if(t >= 0.8) {
-            camera.x += 1.05 * scalar * (t - 0.8);
+            camera.x += 1.07 * scalar * (t - 0.8);
             camera.z *= 1.1f;
         }
 
@@ -82,7 +82,7 @@ public class BranchedTube extends Tube {
     }
 
     public Tube getChild() {
-        return nextIsLeft ? right : left;
+        return nextIsLeft ? left : right;
     }
 
     /** Draw the right branch **/
