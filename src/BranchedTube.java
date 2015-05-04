@@ -9,10 +9,8 @@ public class BranchedTube extends Tube {
     private static ObjModel geometry;
     private Tube left = null;
     private Tube right = null;
-    private float rotate;
     private final float translations[] = {-0.92f, -0.05f};
     private static float childRotation = 45;
-    private RedBloodCell cell;
     private boolean nextIsLeft;
 
     public BranchedTube(GL gl, GLU glu, WhiteBloodCell whiteBloodCell) {
@@ -28,7 +26,8 @@ public class BranchedTube extends Tube {
 
         if(first) positionCamera(t);
         this.draw();
-        drawRedBloodCells();
+//        drawRedBloodCells();
+        drawCells();
 
         if (depth-- > 0) {
             gl.glPushMatrix();

@@ -25,7 +25,8 @@ public class StraightTube extends Tube {
         gl.glPushMatrix();
         if(first) positionCamera(t);
         this.draw();
-        drawRedBloodCells();
+//        drawRedBloodCells();
+        drawCells();
         drawChild(depth);
         gl.glPopMatrix();
     }

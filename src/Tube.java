@@ -2,6 +2,8 @@ import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
+
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -10,20 +12,31 @@ import java.util.Random;
 public abstract class Tube extends DrawableObject {
     protected static Random random;
     protected GLU glu;
-    protected WhiteBloodCell whiteBloodCell;
-    RedBloodCell redBloodCelllist[];
-    Vector3f cellPositions[];
+    static WhiteBloodCell whiteBloodCell;
+	ArrayList<FloatingObject> list = new ArrayList<FloatingObject>();
+	ArrayList<Vector3f> positions = new ArrayList<Vector3f>();
+ 
+//    RedBloodCell redBloodCellBloodCellGame.list[];
+//    Vector3f cellBloodCellGame.positions[];
 
     public Tube(String file, GL gl, GLU glu, WhiteBloodCell whiteBloodCell) {
         super(file, gl);
         this.glu = glu;
-        this.whiteBloodCell = whiteBloodCell;
-        redBloodCelllist = new RedBloodCell[3];
-        cellPositions = new Vector3f[3];
+        Tube.whiteBloodCell = whiteBloodCell;
+//        redBloodCellBloodCellGame.list = new RedBloodCell[3];
+//        cellBloodCellGame.positions = new Vector3f[3];
 
         for(int i = 0; i < 3; i++) {
-            redBloodCelllist[i] = new RedBloodCell(gl);
-            cellPositions[i] = new Vector3f((float)Math.random() * 0.2f - 0.1f, (float)Math.random() * 0.2f - 0.1f, (float)Math.random()*0.5f - 0.25f);
+        	int x = (int)(Math.random()*100);
+        	if (x>22){
+            list.add(i,new RedBloodCell(gl));
+        	}
+        	else if (x<19){
+            list.add(i,new BacteriaCell(gl));
+            }
+        	else
+        	list.add(i,new WhiteBloodCell(gl, glu));	
+            positions.add(i,new Vector3f((float)Math.random() * 0.18f - 0.08f, (float)Math.random() * 0.18f - 0.08f, (float)Math.random()*0.5f - 0.25f));
         }
 
         random = new Random();
@@ -63,11 +76,21 @@ public abstract class Tube extends DrawableObject {
 
     abstract public void draw(int depth, float t, boolean first);
 
-    protected void drawRedBloodCells(){
+//    protected void drawRedBloodCells(){
+//        for(int i = 0; i < 3; i++) {
+//            gl.glPushMatrix();
+//            gl.glTranslatef(cellBloodCellGame.positions[i].x, cellBloodCellGame.positions[i].y, cellBloodCellGame.positions[i].z);
+//            redBloodCellBloodCellGame.list[i].draw();
+//            gl.glPopMatrix();
+//        }
+//
+//    }
+    
+    protected void drawCells(){
         for(int i = 0; i < 3; i++) {
             gl.glPushMatrix();
-            gl.glTranslatef(cellPositions[i].x, cellPositions[i].y, cellPositions[i].z);
-            redBloodCelllist[i].draw();
+            gl.glTranslatef(positions.get(i).x, positions.get(i).y, positions.get(i).z);
+            list.get(i).draw();
             gl.glPopMatrix();
         }
 
