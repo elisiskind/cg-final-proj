@@ -1,17 +1,11 @@
-import com.sun.opengl.util.FPSAnimator;
-
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.*;
-import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import javax.vecmath.Vector4f;
-
 import java.awt.event.*;
-import java.io.*;
 
 class BloodCellGame extends JFrame implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, ActionListener, WorldSpaceUpdateListener, WorldSpaceCollisionListener {
 
@@ -19,7 +13,6 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
     private final GLCanvas canvas;
     private final GLU glu = new GLU();
     BranchedTube first;
-    Shader shader;
     private GL gl;
     private int winW = 800, winH = 800;
     private boolean wireframe = false;
@@ -158,7 +151,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         WORLDSPACE.startRendering();
         
     
-        gl.glClearColor(.1f, .1f, .1f, 1f);
+        gl.glClearColor(.5f, 0.0f, 0.0f, 0.2f);
         gl.glClearDepth(1.0f);
 
         // white light at the eye
@@ -184,6 +177,7 @@ class BloodCellGame extends JFrame implements GLEventListener, KeyListener, Mous
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_POSITION, position, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_DIFFUSE, diffuse, 0);
         gl.glLightfv(GL.GL_LIGHT2, GL.GL_SPECULAR, specular, 0);
+        gl.glLightfv(GL.GL_LIGHT2, GL.GL_SPOT_DIRECTION, spotDirection, 0);
 
 //        //material
 //        float mat_ambient[] = {0, 0, 0, 1};
