@@ -177,7 +177,7 @@ public class WorldSpace {
 					}
 					
 					if(camYRotateFactor != 0){
-						camYRotateVal += camYRotateFactor * delta * 180;
+						camYRotateVal -= camYRotateFactor * delta * 180;
 						this.camObject.setRotY(camYRotateVal);
 					}
 					
@@ -313,6 +313,14 @@ public class WorldSpace {
 						shader.setLightPosition(new Vector3f(0f,0f,-0.27f));
 						shader.setExtinctionCoefficient(new Vector3f(0.1f,0.1f,0.1f));
 						shader.setMaterialThickness(0.2f);
+						break;
+						
+				case 4: shader.setBaseColor(new Vector4f(0.3f,0.4f,0.0f,0.0f)); //bacteria
+						shader.setLightColor(new Vector4f(0.1f,0.1f,0.0f,0.2f));
+						shader.setSpecColor(new Vector4f(0.f,0.1f,0.0f,0.2f));
+						shader.setLightPosition(new Vector3f(0f,0f,-0.27f));
+						shader.setExtinctionCoefficient(new Vector3f(0.1f,0.1f,0.1f));
+						shader.setMaterialThickness(0.01f);
 						break;
 			}
 		}
